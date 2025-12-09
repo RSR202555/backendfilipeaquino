@@ -3,6 +3,43 @@ import { prisma } from '../lib/prisma';
 
 export const availabilitiesRouter = Router();
 
+// GET /api/availabilities?serviceId=1&date=YYYY-MM-DD
+availabilitiesRouter.get('/', async (req, res) => {
+  try {
+    const { serviceId, date } = req.query as {
+      serviceId?: string;
+      date?: string;
+    };
+
+    if (!serviceId) {
+      return res.status(400).json({ error: 'serviceId é obrigatório' });
+    }
+
+    const where: any = {
+      serviceId: Number(serviceId),
+    };
+
+    if (date) {
+      const dayStart = new Date(`${date}T00:00:00`);
+      const dayEnd = new Date(`${date}T23:59:59`);
+      where.date = {
+        gte: dayStart,
+        lte: dayEnd,
+      };
+    }
+
+    const availabilities = await prisma.availability.findMany({
+      where,
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+    });
+
+    res.json(availabilities);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Erro ao listar disponibilidades' });
+  }
+});
+
 // GET /api/availabilities/admin?serviceId=1
 availabilitiesRouter.get('/admin', async (req, res) => {
   try {

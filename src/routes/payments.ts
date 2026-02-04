@@ -33,7 +33,7 @@ paymentsRouter.post('/create-preference', async (req, res) => {
         description: '4 sessões mensais de consultoria',
       },
       anual: {
-        title: 'Plano Anual',
+        title: 'Plano Premium',
         price: 497,
         description: '8 sessões mensais com acompanhamento premium',
       },

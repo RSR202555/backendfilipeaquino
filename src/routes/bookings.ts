@@ -141,13 +141,14 @@ bookingsRouter.get('/occupied', async (req, res) => {
     }
 
     const start = new Date(`${date}T00:00:00`);
-    const end = new Date(`${date}T23:59:59`);
+    const endExclusive = new Date(start);
+    endExclusive.setDate(endExclusive.getDate() + 1);
 
     const bookings = await prisma.booking.findMany({
       where: {
         scheduledAt: {
           gte: start,
-          lte: end,
+          lt: endExclusive,
         },
         serviceId: serviceId ? Number(serviceId) : undefined,
         workshopId: workshopId ? Number(workshopId) : undefined,

@@ -3,6 +3,16 @@ import { prisma } from '../lib/prisma';
 
 export const availabilitiesRouter = Router();
 
+function getDayRange(date: string) {
+  const start = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(start.getTime())) {
+    throw new Error('Data inválida. Use o formato YYYY-MM-DD.');
+  }
+  const endExclusive = new Date(start);
+  endExclusive.setDate(endExclusive.getDate() + 1);
+  return { start, endExclusive };
+}
+
 // GET /api/availabilities?serviceId=1&date=YYYY-MM-DD
 availabilitiesRouter.get('/', async (req, res) => {
   try {
@@ -17,14 +27,14 @@ availabilitiesRouter.get('/', async (req, res) => {
 
     const where: any = {
       serviceId: Number(serviceId),
+      isBlocked: false,
     };
 
     if (date) {
-      const dayStart = new Date(`${date}T00:00:00`);
-      const dayEnd = new Date(`${date}T23:59:59`);
+      const { start, endExclusive } = getDayRange(date);
       where.date = {
-        gte: dayStart,
-        lte: dayEnd,
+        gte: start,
+        lt: endExclusive,
       };
     }
 
